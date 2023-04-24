@@ -1,10 +1,15 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
+const Jimp = require("jimp");
+const fs = require("fs").promises;
+const path = require("path");
 const { User } = require("../../models/user");
 const { HttpError } = require("../../helpers");
 const { controllerWrap } = require("../../utils");
 
 const { SECRET_KEY } = process.env;
+const avatarsDir = path.join(__dirname, "../../", "public", "avatars");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -14,8 +19,13 @@ const register = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
+  const avatarURL = gravatar.url(email);
 
-  const result = await User.create({ ...req.body, password: hashPassword });
+  const result = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  });
   res.status(201).json({
     user: {
       email: result.email,
@@ -85,10 +95,30 @@ const updateSubscription = async (req, res) => {
   res.status(200).json(updatedUser);
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, filename } = req.file;
+  const avatarName = `${_id}_${filename}`;
+  const uploadResult = path.join(avatarsDir, avatarName);
+  try {
+    const img = await Jimp.read(tempUpload);
+    img.resize(250, 250);
+    await img.writeAsync(tempUpload);
+    await fs.rename(tempUpload, uploadResult);
+    const avatarURL = path.join("avatars", avatarName);
+    await User.findByIdAndUpdate(_id, { avatarURL });
+
+    res.json({ avatarURL });
+  } catch (error) {
+    return res.status(500).json({ message: "Inappropriate file format" });
+  }
+};
+
 module.exports = {
   register: controllerWrap(register),
   login: controllerWrap(login),
   getCurrent: controllerWrap(getCurrent),
   logout: controllerWrap(logout),
   updateSubscription: controllerWrap(updateSubscription),
+  updateAvatar: controllerWrap(updateAvatar),
 };
