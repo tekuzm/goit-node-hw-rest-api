@@ -84,7 +84,7 @@ describe("test /users/login route", () => {
 
   test("should successfully log in with correct credentials", async () => {
     const loginData = {
-      email: "test@gmail.com",
+      email: "test12@gmail.com",
       password: "Test1234",
     };
 
