@@ -12,10 +12,10 @@ router.post(
   authController.register
 );
 
-router.get("verify/:verificationToken", authController.verify);
+router.get("/verify/:verificationToken", authController.verify);
 
 router.post(
-  "verify",
+  "/verify",
   validator(schemas.emailSchema),
   authController.resendVerifyEmail
 );

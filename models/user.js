@@ -61,7 +61,8 @@ const schemas = {
   emailSchema: Joi.object({
     email: Joi.string()
       .pattern(emailRegex)
-      .required("missing required field email"),
+      .required()
+      .messages({ "any.required": `missing required field email` }),
   }),
 };
 
