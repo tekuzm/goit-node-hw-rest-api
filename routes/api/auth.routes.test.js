@@ -8,6 +8,7 @@ const {
 } = require("@jest/globals");
 const mongoose = require("mongoose");
 const request = require("supertest");
+const bcrypt = require("bcrypt");
 const app = require("../../app");
 const { User } = require("../../models/user");
 
@@ -84,12 +85,14 @@ describe("test /users/login route", () => {
 
   test("should successfully log in with correct credentials", async () => {
     const loginData = {
-      email: "test12@gmail.com",
+      email: "test8@gmail.com",
       password: "Test1234",
     };
 
     // Create a user with the loginData
-    await User.create(loginData);
+    const hashPassword = await bcrypt.hash(loginData.password, 10);
+
+    await User.create({ ...loginData, password: hashPassword });
 
     const res = await request(app).post("/users/login").send(loginData);
     expect(res.statusCode).toBe(200);
