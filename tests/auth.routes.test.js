@@ -9,8 +9,8 @@ const {
 const mongoose = require("mongoose");
 const request = require("supertest");
 const bcrypt = require("bcrypt");
-const app = require("../../app");
-const { User } = require("../../models/user");
+const app = require("../app");
+const { User } = require("../models/user");
 
 const { DB_HOST_TEST, PORT } = process.env;
 
